@@ -13,16 +13,16 @@ ifeq ($(ENABLE_BUILD), yes)
 makefiles = \
   mk/precompiled-headers.mk \
   local.mk \
-  src/libutil/local.mk \
-  src/libstore/local.mk \
-  src/libfetchers/local.mk \
-  src/libmain/local.mk \
-  src/libexpr/local.mk \
-  src/libcmd/local.mk \
-  src/nix/local.mk \
-  src/libutil-c/local.mk \
-  src/libstore-c/local.mk \
-  src/libexpr-c/local.mk
+  subprojects/libutil/local.mk \
+  subprojects/libstore/local.mk \
+  subprojects/libfetchers/local.mk \
+  subprojects/libmain/local.mk \
+  subprojects/libexpr/local.mk \
+  subprojects/libcmd/local.mk \
+  subprojects/nix/local.mk \
+  subprojects/libutil-c/local.mk \
+  subprojects/libstore-c/local.mk \
+  subprojects/libexpr-c/local.mk
 
 ifdef HOST_UNIX
 makefiles += \
@@ -98,7 +98,7 @@ ifdef HOST_WINDOWS
   GLOBAL_LDFLAGS += -Wl,--export-all-symbols
 endif
 
-GLOBAL_CXXFLAGS += -g -Wall -Wdeprecated-copy -Wignored-qualifiers -Wimplicit-fallthrough -include $(buildprefix)config.h -std=c++2a -I src
+GLOBAL_CXXFLAGS += -g -Wall -Wdeprecated-copy -Wignored-qualifiers -Wimplicit-fallthrough -include $(buildprefix)config.h -std=c++2a -I subprojects
 
 # Include the main lib, causing rules to be defined
 

@@ -36,27 +36,27 @@ GENERATE_LATEX         = NO
 # so they can expand variables despite configure variables.
 
 INPUT                  = \
-  src/libcmd \
-  src/libexpr \
-  src/libexpr/flake \
+  subprojects/libcmd \
+  subprojects/libexpr \
+  subprojects/libexpr/flake \
   tests/unit/libexpr \
   tests/unit/libexpr/value \
   tests/unit/libexpr/test \
   tests/unit/libexpr/test/value \
-  src/libexpr/value \
-  src/libfetchers \
-  src/libmain \
-  src/libstore \
-  src/libstore/build \
-  src/libstore/builtins \
+  subprojects/libexpr/value \
+  subprojects/libfetchers \
+  subprojects/libmain \
+  subprojects/libstore \
+  subprojects/libstore/build \
+  subprojects/libstore/builtins \
   tests/unit/libstore \
   tests/unit/libstore/test \
-  src/libutil \
+  subprojects/libutil \
   tests/unit/libutil \
   tests/unit/libutil/test \
-  src/nix \
-  src/nix-env \
-  src/nix-store
+  subprojects/nix \
+  subprojects/nix-env \
+  subprojects/nix-store
 
 # If the MACRO_EXPANSION tag is set to YES, doxygen will expand all macro names
 # in the source code. If set to NO, only conditional compilation will be

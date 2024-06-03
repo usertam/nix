@@ -180,7 +180,7 @@ in {
           ./doc
           ./misc
           ./precompiled-headers.h
-          ./src
+          ./subprojects
           ./COPYING
           ./scripts/local.mk
         ] ++ lib.optionals buildUnitTests [
@@ -192,7 +192,7 @@ in {
         ] ++ lib.optionals (enableInternalAPIDocs || enableExternalAPIDocs) [
           # Source might not be compiled, but still must be available
           # for Doxygen to gather comments.
-          ./src
+          ./subprojects
           ./tests/unit
         ] ++ lib.optionals buildUnitTests [
           ./tests/unit
@@ -367,7 +367,7 @@ in {
   # Work around weird bug where it doesn't think there is a Makefile.
   installCheckPhase = if (!doBuild && doInstallCheck) then ''
     runHook preInstallCheck
-    mkdir -p src/nix-channel
+    mkdir -p subprojects/nix-channel
     make installcheck -j$NIX_BUILD_CORES -l$NIX_BUILD_CORES
   '' else null;
 
@@ -375,7 +375,7 @@ in {
   # built Nix.
   preInstallCheck =
     lib.optionalString (! doBuild) ''
-      mkdir -p src/nix-channel
+      mkdir -p subprojects/nix-channel
     ''
     # See https://github.com/NixOS/nix/issues/2523
     # Occurs often in tests since https://github.com/NixOS/nix/pull/9900
