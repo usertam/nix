@@ -206,7 +206,7 @@ ref<const ValidPathInfo> BinaryCacheStore::addToStoreCommon(
 
         if (auto st = narAccessor->maybeLstat(buildIdDir); st && st->type == SourceAccessor::tDirectory) {
 
-            ThreadPool threadPool(25);
+            ThreadPool threadPool(97);
 
             auto doFile = [&](std::string member, std::string key, std::string target) {
                 checkInterrupt();
