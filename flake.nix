@@ -167,21 +167,23 @@
 
           changelog-d-nix = final.buildPackages.callPackage ./misc/changelog-d.nix { };
 
-          nix =
-            let
-              officialRelease = false;
-              versionSuffix =
-                if officialRelease
-                then ""
-                else "pre${builtins.substring 0 8 (self.lastModifiedDate or self.lastModified or "19700101")}_${self.shortRev or "dirty"}";
+          nix-util = final.callPackage ./src/libutil/package.nix {
+            inherit
+              fileset
+              stdenv
+              officialRelease
+              versionSuffix
+              ;
+          };
 
-            in final.callPackage ./package.nix {
+          nix =
+            final.callPackage ./package.nix {
               inherit
                 fileset
                 stdenv
+                officialRelease
                 versionSuffix
                 ;
-              officialRelease = false;
               boehmgc = final.boehmgc-nix;
               libgit2 = final.libgit2-nix;
               libseccomp = final.libseccomp-nix;
@@ -210,7 +212,7 @@
       # 'nix.perl-bindings' packages.
       overlays.default = overlayFor (p: p.stdenv);
 
-      hydraJobs = import ./build/hydra.nix {
+      hydraJobs = import ./maintainers/hydra.nix {
         inherit
           inputs
           binaryTarball
@@ -243,11 +245,12 @@
       } // devFlake.checks.${system} or {}
       );
 
-      packages = forAllSystems (system: rec {
-        inherit (nixpkgsFor.${system}.native) nix changelog-d-nix;
+      packages = forAllSystems (system: let
+        forAllPackagesList = lib.flip map [ "nix" "nix-util" ];
+      in rec {
+        inherit (nixpkgsFor.${system}.native) nix nix-util changelog-d-nix;
         default = nix;
-      } // (lib.optionalAttrs (builtins.elem system linux64BitSystems) {
-        nix-static = nixpkgsFor.${system}.static.nix;
+      } // lib.optionalAttrs (builtins.elem system linux64BitSystems) {
         dockerImage =
           let
             pkgs = nixpkgsFor.${system}.native;
@@ -262,18 +265,25 @@
               ln -s ${image} $image
               echo "file binary-dist $image" >> $out/nix-support/hydra-build-products
             '';
-      } // builtins.listToAttrs (map
-          (crossSystem: {
-            name = "nix-${crossSystem}";
-            value = nixpkgsFor.${system}.cross.${crossSystem}.nix;
-          })
+      } // builtins.listToAttrs (forAllPackagesList
+          (pkgName: {
+            name = "${pkgName}-static";
+            value = nixpkgsFor.${system}.static.${pkgName};
+          }))
+        // builtins.listToAttrs (lib.concatMap
+          (crossSystem: forAllPackagesList
+            (pkgName: {
+              name = "${pkgName}-${crossSystem}";
+              value = nixpkgsFor.${system}.cross.${crossSystem}.${pkgName};
+            }))
           crossSystems)
-        // builtins.listToAttrs (map
-          (stdenvName: {
-            name = "nix-${stdenvName}";
-            value = nixpkgsFor.${system}.stdenvs."${stdenvName}Packages".nix;
-          })
-          stdenvs)));
+        // builtins.listToAttrs (lib.concatMap
+          (stdenvName: forAllPackagesList
+            (pkgName: {
+              name = "${pkgName}-${stdenvName}";
+              value = nixpkgsFor.${system}.stdenvs."${stdenvName}Packages".${pkgName};
+            }))
+          stdenvs));
 
       devShells = let
         makeShell = pkgs: stdenv: (pkgs.nix.override { inherit stdenv; forDevShell = true; }).overrideAttrs (attrs:
@@ -295,12 +305,19 @@
           src = null;
 
           env = {
+            # Needed for Meson to find Boost.
+            # https://github.com/NixOS/nixpkgs/issues/86131.
+            BOOST_INCLUDEDIR = "${lib.getDev pkgs.boost}/include";
+            BOOST_LIBRARYDIR = "${lib.getLib pkgs.boost}/lib";
             # For `make format`, to work without installing pre-commit
             _NIX_PRE_COMMIT_HOOKS_CONFIG =
               "${(pkgs.formats.yaml { }).generate "pre-commit-config.yaml" modular.pre-commit.settings.rawConfig}";
           };
 
+          inherit (pkgs.nix-util) mesonFlags;
+
           nativeBuildInputs = attrs.nativeBuildInputs or []
+            ++ pkgs.nix-util.nativeBuildInputs
             ++ [
               modular.pre-commit.settings.package
               (pkgs.writeScriptBin "pre-commit-hooks-install"
