@@ -471,7 +471,7 @@ Value & AttrCursor::forceValue()
         else if (v.type() == nInt)
             cachedValue = {root->db->setInt(getKey(), v.integer()), int_t{v.integer()}};
         else if (v.type() == nAttrs)
-            ; // FIXME: do something?
+            debug("intentionally keep uncached attribute attribute '%s'", getAttrPathStr()); // FIXME: do something?
         else
             cachedValue = {root->db->setMisc(getKey()), misc_t()};
     }
