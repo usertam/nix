@@ -977,6 +977,14 @@ static RegisterPrimOp primop_tryEval({
 static void prim_getEnv(EvalState & state, const PosIdx pos, Value * * args, Value & v)
 {
     std::string name(state.forceStringNoCtx(*args[0], pos, "while evaluating the first argument passed to builtins.getEnv"));
+
+    if (name == "NIXPKGS_ALLOW_UNFREE" ||
+        name == "NIXPKGS_ALLOW_BROKEN" ||
+        name == "NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM") {
+        v.mkString(getEnv(name).value_or(""));
+        return;
+    }
+
     v.mkString(state.settings.restrictEval || state.settings.pureEval ? "" : getEnv(name).value_or(""));
 }
 
