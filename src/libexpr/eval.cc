@@ -3137,9 +3137,7 @@ std::optional<SourcePath> EvalState::resolveLookupPathPath(const LookupPath::Pat
         if (path.resolveSymlinks().pathExists())
             return finish(std::move(path));
         else {
-            logWarning({
-                .msg = HintFmt("Nix search path entry '%1%' does not exist, ignoring", value)
-            });
+            debug("Nix search path entry '%s' does not exist, ignoring", value);
         }
     }
 
