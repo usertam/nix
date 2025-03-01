@@ -509,7 +509,7 @@ std::shared_ptr<AttrCursor> AttrCursor::maybeGetAttr(Symbol name)
                     if (std::get_if<missing_t>(&attr->second))
                         return nullptr;
                     else if (std::get_if<failed_t>(&attr->second))
-                        throw CachedEvalError(ref(shared_from_this()), name);
+                        root->db = nullptr;
                     else
                         return std::make_shared<AttrCursor>(root,
                             std::make_pair(shared_from_this(), name), nullptr, std::move(attr));
