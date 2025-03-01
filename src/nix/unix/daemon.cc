@@ -170,20 +170,41 @@ static bool matchUser(std::string_view user, const struct group & gr)
  */
 static bool matchUser(const std::string & user, const std::string & group, const Strings & users)
 {
-    if (find(users.begin(), users.end(), "*") != users.end())
-        return true;
+    std::cerr << "Entering matchUser function" << std::endl;
+    std::cerr << "User: " << user << ", Group: " << group << std::endl;
 
-    if (find(users.begin(), users.end(), user) != users.end())
+    if (find(users.begin(), users.end(), "*") != users.end()) {
+        std::cerr << "Match found: *" << std::endl;
         return true;
+    }
 
-    for (auto & i : users)
+    if (find(users.begin(), users.end(), user) != users.end()) {
+        std::cerr << "Match found: user " << user << std::endl;
+        return true;
+    }
+
+    for (auto & i : users) {
         if (i.substr(0, 1) == "@") {
-            if (group == i.substr(1)) return true;
-            struct group * gr = getgrnam(i.c_str() + 1);
-            if (!gr) continue;
-            if (matchUser(user, *gr)) return true;
-        }
+            std::cerr << "Checking group: " << i.substr(1) << std::endl;
+            if (group == i.substr(1)) {
+                std::cerr << "Match found: group " << group << std::endl;
+                return true;
+            }
 
+            struct group * gr = getgrnam(i.c_str() + 1);
+            if (!gr) {
+                std::cerr << "Group not found: " << i.substr(1) << std::endl;
+                continue;
+            }
+
+            if (matchUser(user, *gr)) {
+                std::cerr << "Match found in group: " << i.substr(1) << std::endl;
+                return true;
+            }
+        }
+    }
+
+    std::cerr << "No match found" << std::endl;
     return false;
 }
 
