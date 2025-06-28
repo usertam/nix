@@ -52,7 +52,7 @@ Path getHome()
         if (!homeDir) {
             homeDir = getHomeOf(geteuid());
             if (unownedUserHomeDir.has_value() && unownedUserHomeDir != homeDir) {
-                warn(
+                debug(
                     "$HOME ('%s') is not owned by you, falling back to the one defined in the 'passwd' file ('%s')",
                     *unownedUserHomeDir,
                     *homeDir);
