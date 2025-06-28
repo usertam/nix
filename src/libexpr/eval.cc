@@ -3293,7 +3293,7 @@ std::optional<SourcePath> EvalState::resolveLookupPathPath(const LookupPath::Pat
             if (auto accessor = path.accessor.dynamic_pointer_cast<FilteringSourceAccessor>())
                 accessor->checkAccess(path.path);
 
-            logWarning({.msg = HintFmt("Nix search path entry '%1%' does not exist, ignoring", value)});
+            debug("Nix search path entry '%1%' does not exist, ignoring", value);
         }
     }
 
